@@ -790,68 +790,87 @@ export default function SiravScheduler() {
               <button style={aBtn} onClick={()=>setNewQuote("")}>Clear</button>
             </div>
           </div>
-          <div style={{ display:"flex", gap:6, marginBottom:14 }}>
-            {["all","identity","relationship","wealth","posted"].map(f=>(
-              <button key={f} onClick={()=>setLibFilter(f)}
-                style={{ padding:"5px 12px", borderRadius:20, fontSize:11, cursor:"pointer", textTransform:"capitalize", border:`0.5px solid ${libFilter===f?(TAG_COLORS[f]||"#444"):"#222"}`, color:libFilter===f?(TAG_COLORS[f]||"#fff"):"#555", background:libFilter===f?(TAG_BG[f]||"#1a1a1a"):"transparent" }}>
-                {f}
-              </button>
-            ))}
+          {/* Filter tabs */}
+          <div style={{ display:"flex", gap:4, marginBottom:16, flexWrap:"wrap" }}>
+            {["all","identity","relationship","wealth","posted","recent"].map(f=>{
+              const isRecent = f==="recent";
+              const count = isRecent ? recentQuotes.length : f==="all" ? library.length : library.filter(q=>q.tag===f).length;
+              const active = libFilter===f;
+              const col = TAG_COLORS[f]||"#aaa";
+              const bg  = TAG_BG[f]||"#1e1e1e";
+              return (
+                <button key={f} onClick={()=>setLibFilter(f)}
+                  style={{ padding:"6px 14px", borderRadius:20, fontSize:12, cursor:"pointer", textTransform:"capitalize",
+                    border:`1px solid ${active?(isRecent?"#555":col):"#2e2e2e"}`,
+                    color:active?(isRecent?"#fff":col):"#888",
+                    background:active?(isRecent?"#2a2a2a":bg):"transparent",
+                    fontWeight:active?600:400 }}>
+                  {f}{count>0?` (${count})`:""}
+                </button>
+              );
+            })}
           </div>
-          <div style={lbl}>Saved — {filteredLib.length} quotes</div>
-          {filteredLib.length===0&&<div style={{ textAlign:"center", color:"#333", fontSize:14, padding:"48px 0" }}>No quotes yet.</div>}
-          {filteredLib.map(q=>(
-            <div key={q.id} style={{ background:"#111", border:"0.5px solid #1e1e1e", borderRadius:12, padding:14, marginBottom:8 }}>
-              {libEditId===q.id?(
-                <>
-                  <textarea style={{ ...ta, marginBottom:10 }} value={libEditText} onChange={e=>setLibEditText(e.target.value)}/>
-                  <div style={aRow}>
-                    <button style={gBtn} onClick={()=>{setLibrary(prev=>prev.map(x=>x.id===q.id?{...x,text:libEditText}:x));setLibEditId(null);}}>Save</button>
-                    <button style={aBtn} onClick={()=>setLibEditId(null)}>Cancel</button>
-                  </div>
-                </>
-              ):(
-                <>
-                  <div style={{ fontSize:17, lineHeight:1.75, color:"#f0f0f0", whiteSpace:"pre-wrap", marginBottom:12 }}>{q.text}</div>
-                  <div style={{ display:"flex", gap:5, marginBottom:10 }}>
-                    {["identity","relationship","wealth","posted"].map(tag=>(
-                      <button key={tag} onClick={()=>setLibraryTag(q.id,tag)}
-                        style={{ padding:"4px 13px", borderRadius:20, fontSize:12, cursor:"pointer", textTransform:"capitalize", border:`1px solid ${q.tag===tag?TAG_COLORS[tag]:"#2e2e2e"}`, color:q.tag===tag?TAG_COLORS[tag]:"#777", background:q.tag===tag?TAG_BG[tag]:"transparent", fontWeight:q.tag===tag?600:400 }}>
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                  <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
-                    {q.score&&<span style={sBadge(q.label)}>{q.score}/10</span>}
-                    {q.source==="manual"&&<span style={{ fontSize:10, color:"#444" }}>written</span>}
-                  </div>
-                  <div style={aRow}>
-                    <button style={gBtn} onClick={()=>publishToThreads(q.text,q.id)} disabled={publishing===q.id}>{publishing===q.id?"Publishing...":"↑ Post now"}</button>
-                    <button style={bBtn} onClick={()=>setScheduleModal(q)}>📅 Schedule</button>
-                    <button style={gBtn} onClick={()=>addToQueue(q)}>+ Queue</button>
-                    <button style={aBtn} onClick={()=>{setLibEditId(q.id);setLibEditText(q.text);}}>Edit</button>
-                    <button style={aBtn} onClick={()=>copyText(q.text,`lib-${q.id}`)}>{copied===`lib-${q.id}`?"✓":"Copy"}</button>
-                    <button style={rBtn} onClick={()=>deleteFromLibrary(q.id)}>Delete</button>
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
 
-          {/* RECENT GENERATES */}
-          {recentQuotes.length > 0 && (
+          {/* Library items */}
+          {libFilter !== "recent" && (
             <>
-              <div style={{ ...lbl, marginTop:28, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <div style={lbl}>Saved — {filteredLib.length} quotes</div>
+              {filteredLib.length===0&&<div style={{ textAlign:"center", color:"#777", fontSize:14, padding:"48px 0" }}>No quotes yet.</div>}
+              {filteredLib.map(q=>(
+                <div key={q.id} style={{ background:"#141414", border:"1px solid #2a2a2a", borderRadius:12, padding:14, marginBottom:8 }}>
+                  {libEditId===q.id?(
+                    <>
+                      <textarea style={{ ...ta, marginBottom:10 }} value={libEditText} onChange={e=>setLibEditText(e.target.value)}/>
+                      <div style={aRow}>
+                        <button style={gBtn} onClick={()=>{setLibrary(prev=>prev.map(x=>x.id===q.id?{...x,text:libEditText}:x));setLibEditId(null);}}>Save</button>
+                        <button style={aBtn} onClick={()=>setLibEditId(null)}>Cancel</button>
+                      </div>
+                    </>
+                  ):(
+                    <>
+                      <div style={{ fontSize:17, lineHeight:1.75, color:"#f0f0f0", whiteSpace:"pre-wrap", marginBottom:12 }}>{q.text}</div>
+                      <div style={{ display:"flex", gap:5, marginBottom:10 }}>
+                        {["identity","relationship","wealth","posted"].map(tag=>(
+                          <button key={tag} onClick={()=>setLibraryTag(q.id,tag)}
+                            style={{ padding:"4px 13px", borderRadius:20, fontSize:12, cursor:"pointer", textTransform:"capitalize", border:`1px solid ${q.tag===tag?TAG_COLORS[tag]:"#2e2e2e"}`, color:q.tag===tag?TAG_COLORS[tag]:"#777", background:q.tag===tag?TAG_BG[tag]:"transparent", fontWeight:q.tag===tag?600:400 }}>
+                            {tag}
+                          </button>
+                        ))}
+                      </div>
+                      <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
+                        {q.score&&<span style={sBadge(q.label)}>{q.score}/10</span>}
+                        {q.source==="manual"&&<span style={{ fontSize:11, color:"#555" }}>written</span>}
+                      </div>
+                      <div style={aRow}>
+                        <button style={gBtn} onClick={()=>publishToThreads(q.text,q.id)} disabled={publishing===q.id}>{publishing===q.id?"Publishing...":"↑ Post now"}</button>
+                        <button style={bBtn} onClick={()=>setScheduleModal(q)}>📅 Schedule</button>
+                        <button style={gBtn} onClick={()=>addToQueue(q)}>+ Queue</button>
+                        <button style={aBtn} onClick={()=>{setLibEditId(q.id);setLibEditText(q.text);}}>Edit</button>
+                        <button style={aBtn} onClick={()=>copyText(q.text,`lib-${q.id}`)}>{copied===`lib-${q.id}`?"✓":"Copy"}</button>
+                        <button style={rBtn} onClick={()=>deleteFromLibrary(q.id)}>Delete</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Recent generates tab */}
+          {libFilter==="recent" && (
+            <>
+              <div style={{ ...lbl, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                 <span>Recent generates — {recentQuotes.length} / 20</span>
-                <button onClick={()=>setRecentQuotes([])} style={{ fontSize:12, color:"#666", background:"transparent", border:"none", cursor:"pointer" }}>Clear all</button>
+                {recentQuotes.length>0&&<button onClick={()=>setRecentQuotes([])} style={{ fontSize:12, color:"#666", background:"transparent", border:"none", cursor:"pointer" }}>Clear all</button>}
               </div>
+              {recentQuotes.length===0&&<div style={{ textAlign:"center", color:"#777", fontSize:14, padding:"48px 0" }}>No recent generates yet. Hit Generate to start.</div>}
               {recentQuotes.map(q=>(
-                <div key={q.id} style={{ ...card, background:"#111", border:"1px solid #222", opacity:0.85 }}>
+                <div key={q.id} style={{ background:"#141414", border:"1px solid #2a2a2a", borderRadius:12, padding:14, marginBottom:8 }}>
                   <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
                     <span style={sBadge(q.label)}>{q.label}</span>
                     <span style={{ fontSize:12, color:"#666" }}>{q.score}/10</span>
                   </div>
-                  <div style={{ fontSize:15, lineHeight:1.7, color:"#ccc", whiteSpace:"pre-wrap", marginBottom:10 }}>{q.text}</div>
+                  <div style={{ fontSize:17, lineHeight:1.75, color:"#f0f0f0", whiteSpace:"pre-wrap", marginBottom:12 }}>{q.text}</div>
                   <div style={aRow}>
                     <button style={{ ...aBtn, border:"1px solid #1a5a30", color:"#3ddc84" }} onClick={()=>addToLibrary(q)}>→ Library</button>
                     <button style={gBtn} onClick={()=>addToQueue(q)}>+ Queue</button>
