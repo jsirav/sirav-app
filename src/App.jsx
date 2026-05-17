@@ -378,6 +378,15 @@ export default function SiravScheduler() {
   const [tokenInput, setTokenInput] = useState(DEFAULT_TOKEN);
   const [userIdInput, setUserIdInput] = useState(DEFAULT_USER_ID);
 
+  const [missionStatement, setMissionStatement] = useState("");
+  const [missionInput, setMissionInput] = useState("");
+  const [refQuotes, setRefQuotes] = useState([]);
+  const [refQuoteInput, setRefQuoteInput] = useState("");
+  const [refQuoteWorks, setRefQuoteWorks] = useState(true);
+  const [refPhotos, setRefPhotos] = useState([]);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [settingsSubTab, setSettingsSubTab] = useState("credentials");
+
   const [status, setStatus] = useState(null);
   const [copied, setCopied] = useState("");
 
@@ -392,6 +401,12 @@ export default function SiravScheduler() {
       if (s) setScheduled(JSON.parse(s));
       const r = localStorage.getItem("sirav_recent");
       if (r) setRecentQuotes(JSON.parse(r));
+      const m = localStorage.getItem("sirav_mission");
+      if (m) { setMissionStatement(m); setMissionInput(m); }
+      const rq = localStorage.getItem("sirav_refquotes");
+      if (rq) setRefQuotes(JSON.parse(rq));
+      const rp = localStorage.getItem("sirav_refphotos");
+      if (rp) setRefPhotos(JSON.parse(rp));
     } catch (e) {}
   }, []);
 
@@ -399,6 +414,9 @@ export default function SiravScheduler() {
   useEffect(() => { localStorage.setItem("sirav_queue", JSON.stringify(queue)); }, [queue]);
   useEffect(() => { localStorage.setItem("sirav_scheduled", JSON.stringify(scheduled)); }, [scheduled]);
   useEffect(() => { localStorage.setItem("sirav_recent", JSON.stringify(recentQuotes)); }, [recentQuotes]);
+  useEffect(() => { localStorage.setItem("sirav_mission", missionStatement); }, [missionStatement]);
+  useEffect(() => { localStorage.setItem("sirav_refquotes", JSON.stringify(refQuotes)); }, [refQuotes]);
+  useEffect(() => { localStorage.setItem("sirav_refphotos", JSON.stringify(refPhotos)); }, [refPhotos]);
 
   // ── helpers ───────────────────────────────────────────────────────────────
   const flash = (msg, ok=true) => { setStatus({msg,ok}); setTimeout(()=>setStatus(null),3000); };
@@ -412,7 +430,13 @@ export default function SiravScheduler() {
       const res = await fetch("/api/claude", {
         method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000, system:SIRAV_SYSTEM,
-          messages:[{role:"user",content:`Mode: ${mode}${seed?`\nSeed: ${seed}`:""}\n\nGenerate 3 quotes.`}] })
+          messages:[{role:"user",content:[
+            `Mode: ${mode}${seed?`\nSeed: ${seed}`:""}`,
+            missionStatement ? `\nAuthor's voice & mission:\n${missionStatement}` : "",
+            refQuotes.filter(r=>r.works).length ? `\nQuotes that WORK (match this energy):\n${refQuotes.filter(r=>r.works).map(r=>`- ${r.text}`).join("\n")}` : "",
+            refQuotes.filter(r=>!r.works).length ? `\nQuotes that DON'T WORK (avoid this):\n${refQuotes.filter(r=>!r.works).map(r=>`- ${r.text}`).join("\n")}` : "",
+            "\n\nGenerate 3 quotes."
+          ].filter(Boolean).join("")}] })
       });
       const data = await res.json();
       const raw = data.content.find(b=>b.type==="text")?.text||"";
@@ -843,17 +867,166 @@ export default function SiravScheduler() {
       {/* SETTINGS */}
       {tab==="settings" && (
         <>
-          <div style={lbl}>Threads credentials</div>
-          <div style={{ background:"#111", border:"0.5px solid #1e1e1e", borderRadius:12, padding:20, marginBottom:12 }}>
-            <label style={{ fontSize:12, color:"#666", marginBottom:6, display:"block" }}>Access token</label>
-            <input style={inp} type="password" placeholder="Threads access token..." value={tokenInput} onChange={e=>setTokenInput(e.target.value)}/>
-            <label style={{ fontSize:12, color:"#666", marginBottom:6, display:"block" }}>User ID</label>
-            <input style={inp} placeholder="Numeric user ID..." value={userIdInput} onChange={e=>setUserIdInput(e.target.value)}/>
-            <button onClick={saveSettings} style={{ background:"#1a1a1a", color:"#fff", border:"0.5px solid #333", borderRadius:8, padding:"8px 20px", fontSize:13, cursor:"pointer" }}>Save</button>
+          {/* Sub-tabs */}
+          <div style={{ display:"flex", gap:3, marginBottom:20, background:"#1a1a1a", borderRadius:10, padding:3, border:"1px solid #333" }}>
+            {[["credentials","Credentials"],["mission","My Voice"],["references","References"],["rules","AI Rules"]].map(([t,l])=>(
+              <button key={t} onClick={()=>setSettingsSubTab(t)}
+                style={{ flex:1, padding:"9px 0", textAlign:"center", fontSize:13, cursor:"pointer", borderRadius:8, color:settingsSubTab===t?"#fff":"#bbb", background:settingsSubTab===t?"#2a2a2a":"transparent", border:settingsSubTab===t?"1px solid #555":"1px solid transparent", fontWeight:settingsSubTab===t?600:400 }}>
+                {l}
+              </button>
+            ))}
           </div>
-          <div style={{ fontSize:12, color:"#333", lineHeight:1.7 }}>
-            Token expires in ~60 days. Regenerate at developers.facebook.com → Tools → Graph API Explorer.
-          </div>
+
+          {/* CREDENTIALS */}
+          {settingsSubTab==="credentials" && (
+            <>
+              <div style={lbl}>Threads credentials</div>
+              <div style={{ background:"#1a1a1a", border:"1px solid #2e2e2e", borderRadius:12, padding:20, marginBottom:12 }}>
+                <label style={{ fontSize:13, color:"#aaa", marginBottom:6, display:"block" }}>Access token</label>
+                <input style={inp} type="password" placeholder="Threads access token..." value={tokenInput} onChange={e=>setTokenInput(e.target.value)}/>
+                <label style={{ fontSize:13, color:"#aaa", marginBottom:6, display:"block" }}>User ID</label>
+                <input style={inp} placeholder="Numeric user ID..." value={userIdInput} onChange={e=>setUserIdInput(e.target.value)}/>
+                <button onClick={saveSettings} style={{ background:"#2a2a2a", color:"#fff", border:"1px solid #444", borderRadius:8, padding:"10px 24px", fontSize:14, cursor:"pointer" }}>Save</button>
+              </div>
+              <div style={{ fontSize:13, color:"#666", lineHeight:1.7 }}>
+                Token expires in ~60 days. Regenerate at developers.facebook.com → Tools → Graph API Explorer.
+              </div>
+            </>
+          )}
+
+          {/* MY VOICE / MISSION */}
+          {settingsSubTab==="mission" && (
+            <>
+              <div style={lbl}>My voice & mission</div>
+              <div style={{ fontSize:13, color:"#888", marginBottom:14, lineHeight:1.7 }}>
+                Write your thought process, philosophy, or mission behind the quotes. This gets sent to the AI every time you generate — it shapes the output to sound more like you.
+              </div>
+              <textarea style={{ ...ta, minHeight:180, marginBottom:12 }}
+                placeholder={"Example:\nI write for people who are building in silence. The quotes should feel like something you think at 2am when you realize you outgrew your environment. Raw, not polished. No motivation-poster energy..."}
+                value={missionInput} onChange={e=>setMissionInput(e.target.value)}/>
+              <button onClick={()=>{ setMissionStatement(missionInput); flash("Voice saved — AI will use this on next generate."); }}
+                style={{ background:"#b8f5c8", color:"#0a2a0a", border:"1px solid #6ee89a", borderRadius:8, padding:"10px 24px", fontSize:14, fontWeight:700, cursor:"pointer", marginBottom:8 }}>
+                Save voice
+              </button>
+              {missionStatement && (
+                <div style={{ marginTop:16, padding:"12px 14px", background:"#1a1a1a", border:"1px solid #2e2e2e", borderRadius:10 }}>
+                  <div style={{ fontSize:11, color:"#666", marginBottom:6, textTransform:"uppercase", letterSpacing:"0.08em" }}>Active — sent to AI on every generate</div>
+                  <div style={{ fontSize:14, color:"#ccc", lineHeight:1.7, whiteSpace:"pre-wrap" }}>{missionStatement}</div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* REFERENCES */}
+          {settingsSubTab==="references" && (
+            <>
+              {/* Photo references */}
+              <div style={lbl}>Photo references</div>
+              <div style={{ fontSize:13, color:"#888", marginBottom:12, lineHeight:1.6 }}>Upload screenshots, inspo, or anything visual you reference when writing.</div>
+              <label style={{ display:"block", background:"#1a1a1a", border:"1px dashed #3a3a3a", borderRadius:10, padding:"16px", textAlign:"center", cursor:"pointer", marginBottom:16 }}>
+                <input type="file" accept="image/*" multiple style={{ display:"none" }} onChange={e=>{
+                  Array.from(e.target.files).forEach(file=>{
+                    const reader = new FileReader();
+                    reader.onload = ev => setRefPhotos(prev=>[...prev,{ id:Date.now()+Math.random(), name:file.name, data:ev.target.result, caption:"" }]);
+                    reader.readAsDataURL(file);
+                  });
+                  e.target.value="";
+                }}/>
+                <span style={{ fontSize:14, color:"#aaa" }}>+ Upload photos</span>
+              </label>
+              {refPhotos.length > 0 && (
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))", gap:10, marginBottom:20 }}>
+                  {refPhotos.map(p=>(
+                    <div key={p.id} style={{ background:"#1a1a1a", border:"1px solid #2e2e2e", borderRadius:10, overflow:"hidden" }}>
+                      <img src={p.data} alt={p.name} style={{ width:"100%", height:120, objectFit:"cover", display:"block" }}/>
+                      <div style={{ padding:"8px 10px" }}>
+                        <input placeholder="Caption..." value={p.caption} onChange={e=>setRefPhotos(prev=>prev.map(x=>x.id===p.id?{...x,caption:e.target.value}:x))}
+                          style={{ width:"100%", background:"transparent", border:"none", color:"#ccc", fontSize:12, outline:"none", boxSizing:"border-box", marginBottom:4 }}/>
+                        <button onClick={()=>setRefPhotos(prev=>prev.filter(x=>x.id!==p.id))}
+                          style={{ fontSize:11, color:"#555", background:"transparent", border:"none", cursor:"pointer" }}>Remove</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Quote references */}
+              <div style={lbl}>Quote references</div>
+              <div style={{ fontSize:13, color:"#888", marginBottom:12, lineHeight:1.6 }}>Add quotes that worked or didn't. The AI uses these as calibration on every generate.</div>
+              <div style={{ background:"#1a1a1a", border:"1px solid #2e2e2e", borderRadius:12, padding:16, marginBottom:16 }}>
+                <textarea style={{ ...ta, minHeight:60, marginBottom:10 }} placeholder="Paste a quote..." value={refQuoteInput} onChange={e=>setRefQuoteInput(e.target.value)}/>
+                <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                  <button onClick={()=>setRefQuoteWorks(true)}
+                    style={{ padding:"7px 16px", borderRadius:8, fontSize:13, cursor:"pointer", border:`1px solid ${refQuoteWorks?"#1a5a30":"#2e2e2e"}`, background:refQuoteWorks?"#0d3320":"transparent", color:refQuoteWorks?"#3ddc84":"#888", fontWeight:refQuoteWorks?600:400 }}>
+                    ✓ Works
+                  </button>
+                  <button onClick={()=>setRefQuoteWorks(false)}
+                    style={{ padding:"7px 16px", borderRadius:8, fontSize:13, cursor:"pointer", border:`1px solid ${!refQuoteWorks?"#5a1a1a":"#2e2e2e"}`, background:!refQuoteWorks?"#2a0d0d":"transparent", color:!refQuoteWorks?"#ff6b6b":"#888", fontWeight:!refQuoteWorks?600:400 }}>
+                    ✕ Doesn't work
+                  </button>
+                  <button onClick={()=>{
+                    if(!refQuoteInput.trim()) return;
+                    setRefQuotes(prev=>[...prev,{ id:Date.now(), text:refQuoteInput.trim(), works:refQuoteWorks }]);
+                    setRefQuoteInput("");
+                  }} style={{ marginLeft:"auto", background:"#2a2a2a", color:"#fff", border:"1px solid #444", borderRadius:8, padding:"7px 18px", fontSize:13, cursor:"pointer", fontWeight:600 }}>
+                    Add
+                  </button>
+                </div>
+              </div>
+              {refQuotes.length > 0 && (
+                <>
+                  {[true, false].map(works=>{
+                    const group = refQuotes.filter(r=>r.works===works);
+                    if(!group.length) return null;
+                    return (
+                      <div key={String(works)} style={{ marginBottom:16 }}>
+                        <div style={{ fontSize:12, color:works?"#3ddc84":"#ff6b6b", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:8 }}>{works?"✓ Works":"✕ Doesn't work"}</div>
+                        {group.map(r=>(
+                          <div key={r.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", padding:"10px 14px", background:"#1a1a1a", border:`1px solid ${works?"#1a4a2a":"#4a1a1a"}`, borderRadius:10, marginBottom:6 }}>
+                            <div style={{ fontSize:14, color:"#e0e0e0", lineHeight:1.6, whiteSpace:"pre-wrap", flex:1 }}>{r.text}</div>
+                            <button onClick={()=>setRefQuotes(prev=>prev.filter(x=>x.id!==r.id))}
+                              style={{ fontSize:12, color:"#555", background:"transparent", border:"none", cursor:"pointer", marginLeft:10, flexShrink:0 }}>✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </>
+          )}
+
+          {/* AI RULES */}
+          {settingsSubTab==="rules" && (
+            <>
+              <div style={lbl}>Current AI instructions</div>
+              <div style={{ fontSize:13, color:"#888", marginBottom:14, lineHeight:1.6 }}>These are the rules the AI follows when generating quotes and replies. To change them, ask your developer.</div>
+              <div style={{ marginBottom:12 }}>
+                <div onClick={()=>setRulesOpen(r=>!r)}
+                  style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 16px", background:"#1a1a1a", border:"1px solid #2e2e2e", borderRadius:rulesOpen?"10px 10px 0 0":10, cursor:"pointer" }}>
+                  <span style={{ fontSize:14, color:"#f0f0f0", fontWeight:600 }}>Quote generation rules</span>
+                  <span style={{ color:"#888" }}>{rulesOpen?"▲":"▼"}</span>
+                </div>
+                {rulesOpen && (
+                  <div style={{ background:"#141414", border:"1px solid #2e2e2e", borderTop:"none", borderRadius:"0 0 10px 10px", padding:"14px 16px" }}>
+                    <pre style={{ fontSize:12, color:"#ccc", lineHeight:1.8, whiteSpace:"pre-wrap", fontFamily:"inherit", margin:0 }}>{SIRAV_SYSTEM}</pre>
+                  </div>
+                )}
+              </div>
+              <div style={{ marginBottom:12 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 16px", background:"#1a1a1a", border:"1px solid #2e2e2e", borderRadius:10, cursor:"pointer" }}
+                  onClick={()=>setRulesOpen(r=>r==="reply"?false:"reply")}>
+                  <span style={{ fontSize:14, color:"#f0f0f0", fontWeight:600 }}>Reply rules</span>
+                  <span style={{ color:"#888" }}>{rulesOpen==="reply"?"▲":"▼"}</span>
+                </div>
+                {rulesOpen==="reply" && (
+                  <div style={{ background:"#141414", border:"1px solid #2e2e2e", borderTop:"none", borderRadius:"0 0 10px 10px", padding:"14px 16px" }}>
+                    <pre style={{ fontSize:12, color:"#ccc", lineHeight:1.8, whiteSpace:"pre-wrap", fontFamily:"inherit", margin:0 }}>{REPLY_SYSTEM}</pre>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </>
       )}
     </div>
