@@ -347,7 +347,7 @@ export default function SiravScheduler() {
     try {
       const res = await fetch("/api/claude", {
         method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:SIRAV_SYSTEM,
+        body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000, system:SIRAV_SYSTEM,
           messages:[{role:"user",content:`Mode: ${mode}${seed?`\nSeed: ${seed}`:""}\n\nGenerate 3 quotes.`}] })
       });
       const data = await res.json();
@@ -364,7 +364,7 @@ export default function SiravScheduler() {
     try {
       const res = await fetch("/api/claude", {
         method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:600, system:REPLY_SYSTEM,
+        body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:600, system:REPLY_SYSTEM,
           messages:[{role:"user",content:`Comment: "${commentInput}"\n\nGenerate 3 reply options.`}] })
       });
       const data = await res.json();
@@ -381,7 +381,7 @@ export default function SiravScheduler() {
     try {
       const res = await fetch("/api/claude", {
         method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:600, system:REPLY_SYSTEM,
+        body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:600, system:REPLY_SYSTEM,
           messages:[{role:"user",content:`Comment: "${commentText}"\n\nGenerate 3 reply options.`}] })
       });
       const data = await res.json();
