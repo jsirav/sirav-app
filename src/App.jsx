@@ -344,6 +344,7 @@ export default function SiravScheduler() {
   const [mode, setMode] = useState("Personal / Identity");
   const [seed, setSeed] = useState("");
   const [quotes, setQuotes] = useState([]);
+  const [recentQuotes, setRecentQuotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
@@ -389,12 +390,15 @@ export default function SiravScheduler() {
       if (q) setQueue(JSON.parse(q));
       const s = localStorage.getItem("sirav_scheduled");
       if (s) setScheduled(JSON.parse(s));
+      const r = localStorage.getItem("sirav_recent");
+      if (r) setRecentQuotes(JSON.parse(r));
     } catch (e) {}
   }, []);
 
   useEffect(() => { localStorage.setItem("sirav_library", JSON.stringify(library)); }, [library]);
   useEffect(() => { localStorage.setItem("sirav_queue", JSON.stringify(queue)); }, [queue]);
   useEffect(() => { localStorage.setItem("sirav_scheduled", JSON.stringify(scheduled)); }, [scheduled]);
+  useEffect(() => { localStorage.setItem("sirav_recent", JSON.stringify(recentQuotes)); }, [recentQuotes]);
 
   // ── helpers ───────────────────────────────────────────────────────────────
   const flash = (msg, ok=true) => { setStatus({msg,ok}); setTimeout(()=>setStatus(null),3000); };
@@ -413,7 +417,9 @@ export default function SiravScheduler() {
       const data = await res.json();
       const raw = data.content.find(b=>b.type==="text")?.text||"";
       const parsed = JSON.parse(raw.replace(/```json|```/g,"").trim());
-      setQuotes(parsed.quotes.map((q,i)=>({...q,id:Date.now()+i})));
+      const newQuotes = parsed.quotes.map((q,i)=>({...q,id:Date.now()+i}));
+      setQuotes(newQuotes);
+      setRecentQuotes(prev => [...newQuotes, ...prev].slice(0, 20));
     } catch { flash("Generation failed.",false); }
     setLoading(false);
   };
@@ -598,6 +604,30 @@ export default function SiravScheduler() {
               )}
             </div>
           ))}
+
+          {/* RECENT GENERATES */}
+          {recentQuotes.length > 0 && (
+            <>
+              <div style={{ ...lbl, marginTop:28, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <span>Recent — {recentQuotes.length} / 20</span>
+                <button onClick={()=>setRecentQuotes([])} style={{ fontSize:11, color:"#555", background:"transparent", border:"none", cursor:"pointer" }}>Clear all</button>
+              </div>
+              {recentQuotes.map(q=>(
+                <div key={q.id} style={{ ...card, background:"#111", border:"1px solid #222", opacity:0.85 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                    <span style={sBadge(q.label)}>{q.label}</span>
+                    <span style={{ fontSize:12, color:"#666" }}>{q.score}/10</span>
+                  </div>
+                  <div style={{ fontSize:15, lineHeight:1.7, color:"#ccc", whiteSpace:"pre-wrap", marginBottom:10 }}>{q.text}</div>
+                  <div style={aRow}>
+                    <button style={{ ...aBtn, border:"1px solid #1a5a30", color:"#3ddc84" }} onClick={()=>addToLibrary(q)}>→ Library</button>
+                    <button style={gBtn} onClick={()=>addToQueue(q)}>+ Queue</button>
+                    <button style={aBtn} onClick={()=>copyText(q.text,`rec-${q.id}`)}>{copied===`rec-${q.id}`?"✓":"Copy"}</button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </>
       )}
 
