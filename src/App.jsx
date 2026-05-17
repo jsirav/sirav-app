@@ -36,8 +36,8 @@ Respond ONLY in raw JSON. No markdown. No backticks.
 {"replies":[{"text":"reply here","tone":"Calm"}]}`;
 
 const MODES = ["Personal / Identity", "Relationship", "Wealth"];
-const TAG_COLORS = { identity: "#c678dd", relationship: "#e5c07b", wealth: "#2ecc71" };
-const TAG_BG    = { identity: "#1e0f2e", relationship: "#2a1f00", wealth: "#0d2b1a" };
+const TAG_COLORS = { identity: "#d98ff5", relationship: "#f5cb6a", wealth: "#3ddc84", posted: "#ff6b6b" };
+const TAG_BG    = { identity: "#2d1545", relationship: "#3a2a00", wealth: "#0f3d20", posted: "#3a0f0f" };
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
@@ -706,7 +706,7 @@ export default function SiravScheduler() {
             </div>
           </div>
           <div style={{ display:"flex", gap:6, marginBottom:14 }}>
-            {["all","identity","relationship","wealth"].map(f=>(
+            {["all","identity","relationship","wealth","posted"].map(f=>(
               <button key={f} onClick={()=>setLibFilter(f)}
                 style={{ padding:"5px 12px", borderRadius:20, fontSize:11, cursor:"pointer", textTransform:"capitalize", border:`0.5px solid ${libFilter===f?(TAG_COLORS[f]||"#444"):"#222"}`, color:libFilter===f?(TAG_COLORS[f]||"#fff"):"#555", background:libFilter===f?(TAG_BG[f]||"#1a1a1a"):"transparent" }}>
                 {f}
@@ -729,9 +729,9 @@ export default function SiravScheduler() {
                 <>
                   <div style={{ fontSize:17, lineHeight:1.75, color:"#f0f0f0", whiteSpace:"pre-wrap", marginBottom:12 }}>{q.text}</div>
                   <div style={{ display:"flex", gap:5, marginBottom:10 }}>
-                    {["identity","relationship","wealth"].map(tag=>(
+                    {["identity","relationship","wealth","posted"].map(tag=>(
                       <button key={tag} onClick={()=>setLibraryTag(q.id,tag)}
-                        style={{ padding:"3px 11px", borderRadius:20, fontSize:10, cursor:"pointer", textTransform:"capitalize", border:`0.5px solid ${q.tag===tag?TAG_COLORS[tag]:"#1e1e1e"}`, color:q.tag===tag?TAG_COLORS[tag]:"#444", background:q.tag===tag?TAG_BG[tag]:"transparent" }}>
+                        style={{ padding:"4px 13px", borderRadius:20, fontSize:12, cursor:"pointer", textTransform:"capitalize", border:`1px solid ${q.tag===tag?TAG_COLORS[tag]:"#2e2e2e"}`, color:q.tag===tag?TAG_COLORS[tag]:"#777", background:q.tag===tag?TAG_BG[tag]:"transparent", fontWeight:q.tag===tag?600:400 }}>
                         {tag}
                       </button>
                     ))}
