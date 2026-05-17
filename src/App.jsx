@@ -164,9 +164,11 @@ const ScheduleModal = ({ quote, onConfirm, onClose }) => {
 };
 
 // ── CALENDAR ──────────────────────────────────────────────────────────────────
-const CalendarView = ({ scheduled }) => {
+const CalendarView = ({ scheduled, library, onSchedule }) => {
   const [viewDate, setViewDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedQuoteId, setSelectedQuoteId] = useState("");
+  const [schedTime, setSchedTime] = useState("09:00");
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
@@ -191,14 +193,31 @@ const CalendarView = ({ scheduled }) => {
 
   const isToday = d => d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
+  const handleDayClick = (d) => {
+    if (selectedDay === d) { setSelectedDay(null); setSelectedQuoteId(""); return; }
+    setSelectedDay(d);
+    setSelectedQuoteId("");
+    setSchedTime("09:00");
+  };
+
+  const handleSchedule = () => {
+    const quote = library.find(q => String(q.id) === String(selectedQuoteId));
+    if (!quote || !selectedDay) return;
+    const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(selectedDay).padStart(2,"0")}`;
+    onSchedule(quote, dateStr, schedTime);
+    setSelectedQuoteId("");
+  };
+
+  const inpStyle = { width:"100%", background:"#161616", border:"1px solid #2e2e2e", borderRadius:8, color:"#f0f0f0", fontSize:14, padding:"10px 12px", outline:"none", boxSizing:"border-box" };
+
   return (
     <div>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
         <button onClick={() => setViewDate(new Date(year, month-1, 1))}
-          style={{ background:"transparent", border:"0.5px solid #222", color:"#888", padding:"5px 14px", borderRadius:6, cursor:"pointer", fontSize:14 }}>‹</button>
-        <span style={{ fontSize:14, color:"#ccc", fontWeight:500 }}>{MONTH_NAMES[month]} {year}</span>
+          style={{ background:"transparent", border:"1px solid #2e2e2e", color:"#aaa", padding:"6px 16px", borderRadius:8, cursor:"pointer", fontSize:16 }}>‹</button>
+        <span style={{ fontSize:15, color:"#f0f0f0", fontWeight:600 }}>{MONTH_NAMES[month]} {year}</span>
         <button onClick={() => setViewDate(new Date(year, month+1, 1))}
-          style={{ background:"transparent", border:"0.5px solid #222", color:"#888", padding:"5px 14px", borderRadius:6, cursor:"pointer", fontSize:14 }}>›</button>
+          style={{ background:"transparent", border:"1px solid #2e2e2e", color:"#aaa", padding:"6px 16px", borderRadius:8, cursor:"pointer", fontSize:16 }}>›</button>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2, marginBottom:4 }}>
         {DAY_NAMES.map(d => <div key={d} style={{ textAlign:"center", fontSize:12, color:"#888", padding:"6px 0", fontWeight:500 }}>{d}</div>)}
@@ -210,11 +229,11 @@ const CalendarView = ({ scheduled }) => {
           const isSel = selectedDay === d;
           const isTd = isToday(d);
           return (
-            <div key={d} onClick={() => setSelectedDay(isSel ? null : d)}
+            <div key={d} onClick={() => handleDayClick(d)}
               style={{
                 aspectRatio:"1", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", borderRadius:10, cursor:"pointer",
                 background: isTd ? "#1a3a5c" : isSel ? "#222" : has ? "#0d2b1a" : "#181818",
-                border: isTd ? "2px solid #6ab0ff" : isSel ? "1px solid #555" : has ? "1px solid #2a6a3a" : "1px solid #2a2a2a",
+                border: isTd ? "2px solid #6ab0ff" : isSel ? "1px solid #aaa" : has ? "1px solid #2a6a3a" : "1px solid #2a2a2a",
                 boxShadow: isTd ? "0 0 8px rgba(106,176,255,0.25)" : "none",
               }}>
               <span style={{ fontSize:13, fontWeight:isTd?700:400, color:isTd?"#6ab0ff":has?"#3ddc84":isSel?"#fff":"#bbb" }}>{d}</span>
@@ -228,21 +247,56 @@ const CalendarView = ({ scheduled }) => {
         <span><span style={{ color:"#6ab0ff" }}>●</span> Today</span>
         <span><span style={{ color:"#555" }}>●</span> Open</span>
       </div>
+
       {selectedDay && (
-        <div style={{ marginTop:16, background:"#0f0f0f", border:"0.5px solid #1e1e1e", borderRadius:12, padding:14 }}>
-          <div style={{ fontSize:12, color:"#555", marginBottom:10, textTransform:"uppercase", letterSpacing:"0.08em" }}>{MONTH_NAMES[month]} {selectedDay}</div>
-          {(dayMap[selectedDay]||[]).length === 0
-            ? <div style={{ fontSize:13, color:"#333" }}>No posts scheduled.</div>
-            : (dayMap[selectedDay]||[]).map((p,i) => (
-                <div key={i} style={{ paddingBottom:10, marginBottom:10, borderBottom:i<(dayMap[selectedDay]||[]).length-1?"0.5px solid #1a1a1a":"none" }}>
-                  <div style={{ fontSize:13, color:"#ccc", whiteSpace:"pre-wrap", marginBottom:4 }}>{p.text}</div>
-                  <div style={{ fontSize:11, color:"#2ecc71" }}>{p.time || "—"}</div>
+        <div style={{ marginTop:16, background:"#141414", border:"1px solid #2a2a2a", borderRadius:14, padding:18 }}>
+          <div style={{ fontSize:13, color:"#aaa", marginBottom:14, fontWeight:600 }}>{MONTH_NAMES[month]} {selectedDay}</div>
+
+          {/* Scheduled posts for this day */}
+          {(dayMap[selectedDay]||[]).length > 0 && (
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:11, color:"#555", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:8 }}>Scheduled</div>
+              {(dayMap[selectedDay]||[]).map((p,i) => (
+                <div key={i} style={{ padding:"10px 12px", background:"#0d2b1a", border:"1px solid #1a4a2a", borderRadius:10, marginBottom:6 }}>
+                  <div style={{ fontSize:14, color:"#f0f0f0", whiteSpace:"pre-wrap", marginBottom:4 }}>{p.text}</div>
+                  <div style={{ fontSize:12, color:"#3ddc84" }}>{p.time || "—"}</div>
                 </div>
-              ))
+              ))}
+            </div>
+          )}
+
+          {/* Schedule from library */}
+          <div style={{ fontSize:11, color:"#555", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:10 }}>Schedule from library</div>
+          {library.length === 0
+            ? <div style={{ fontSize:13, color:"#444", marginBottom:10 }}>No quotes in library yet.</div>
+            : <>
+                <select value={selectedQuoteId} onChange={e => setSelectedQuoteId(e.target.value)}
+                  style={{ ...inpStyle, marginBottom:10, appearance:"none", cursor:"pointer" }}>
+                  <option value="">— Pick a quote —</option>
+                  {library.map(q => (
+                    <option key={q.id} value={q.id}>
+                      {q.text.replace(/\n/g," ").slice(0,60)}{q.text.length>60?"…":""}
+                    </option>
+                  ))}
+                </select>
+                {selectedQuoteId && (
+                  <div style={{ fontSize:14, color:"#ccc", whiteSpace:"pre-wrap", padding:"10px 12px", background:"#0f0f0f", borderRadius:8, border:"1px solid #2a2a2a", marginBottom:10, lineHeight:1.6 }}>
+                    {library.find(q=>String(q.id)===String(selectedQuoteId))?.text}
+                  </div>
+                )}
+                <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:10 }}>
+                  <label style={{ fontSize:12, color:"#777", whiteSpace:"nowrap" }}>Time</label>
+                  <input type="time" value={schedTime} onChange={e=>setSchedTime(e.target.value)} style={{ ...inpStyle }}/>
+                </div>
+                <button onClick={handleSchedule} disabled={!selectedQuoteId}
+                  style={{ width:"100%", background:selectedQuoteId?"#0d3320":"#1a1a1a", color:selectedQuoteId?"#3ddc84":"#444", border:`1px solid ${selectedQuoteId?"#1a5a30":"#2a2a2a"}`, borderRadius:10, padding:"12px 0", fontSize:14, fontWeight:600, cursor:selectedQuoteId?"pointer":"not-allowed" }}>
+                  Schedule for {MONTH_NAMES[month]} {selectedDay}
+                </button>
+              </>
           }
         </div>
       )}
-      <div style={{ marginTop:14, fontSize:11, color:"#2a2a2a", lineHeight:1.7, padding:"10px 12px", background:"#0c0c0c", borderRadius:8, border:"0.5px solid #161616" }}>
+      <div style={{ marginTop:14, fontSize:11, color:"#333", lineHeight:1.7, padding:"10px 12px", background:"#0c0c0c", borderRadius:8, border:"1px solid #1e1e1e" }}>
         ⚠ Scheduling requires a backend to be fully reliable. Posts only fire if this app is open at the scheduled time.
       </div>
     </div>
@@ -586,7 +640,7 @@ export default function SiravScheduler() {
       {tab==="calendar" && (
         <>
           <div style={lbl}>Content calendar</div>
-          <CalendarView scheduled={scheduled}/>
+          <CalendarView scheduled={scheduled} library={library} onSchedule={schedulePost}/>
         </>
       )}
 
