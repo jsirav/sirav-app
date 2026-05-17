@@ -446,24 +446,24 @@ export default function SiravScheduler() {
 
   // ── styles ────────────────────────────────────────────────────────────────
   const tabStyle = (t) => ({
-    flex:1, padding:"9px 2px", textAlign:"center", fontSize:10, cursor:"pointer", borderRadius:7,
-    color:tab===t?"#fff":hoveredTab===t?"#bbb":"#555",
-    background:tab===t?"#1e1e1e":hoveredTab===t?"#141414":"transparent",
-    border:tab===t?"0.5px solid #333":hoveredTab===t?"0.5px solid #1e1e1e":"0.5px solid transparent",
+    flex:1, padding:"11px 4px", textAlign:"center", fontSize:13, cursor:"pointer", borderRadius:9,
+    color:tab===t?"#fff":hoveredTab===t?"#ddd":"#777",
+    background:tab===t?"#222":hoveredTab===t?"#181818":"transparent",
+    border:tab===t?"1px solid #444":hoveredTab===t?"1px solid #2a2a2a":"1px solid transparent",
     fontWeight:tab===t?600:400, letterSpacing:"0.02em", transition:"all 0.12s", boxSizing:"border-box",
   });
 
-  const inp = { width:"100%", background:"#111", border:"0.5px solid #222", borderRadius:8, color:"#fff", fontSize:13, padding:"10px 12px", outline:"none", boxSizing:"border-box", marginBottom:10 };
-  const ta  = { width:"100%", background:"#0d0d0d", border:"0.5px solid #222", borderRadius:8, color:"#fff", fontSize:14, padding:"10px 12px", outline:"none", boxSizing:"border-box", resize:"vertical", minHeight:70, lineHeight:1.6, fontFamily:"inherit" };
-  const lbl = { fontSize:11, color:"#555", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:10 };
-  const card = { background:"#111", border:"0.5px solid #1e1e1e", borderRadius:12, padding:16, marginBottom:10 };
-  const aRow = { display:"flex", gap:6, flexWrap:"wrap" };
-  const aBtn = { fontSize:12, padding:"5px 11px", borderRadius:6, cursor:"pointer", border:"0.5px solid #222", background:"transparent", color:"#888" };
-  const gBtn = { fontSize:12, padding:"5px 11px", borderRadius:6, cursor:"pointer", border:"0.5px solid #1a4a2a", background:"#0d2b1a", color:"#2ecc71" };
-  const bBtn = { fontSize:12, padding:"5px 11px", borderRadius:6, cursor:"pointer", border:"0.5px solid #1a2a4a", background:"#0a1929", color:"#5b9bd5" };
-  const rBtn = { fontSize:12, padding:"5px 11px", borderRadius:6, cursor:"pointer", border:"0.5px solid #2a1a1a", background:"transparent", color:"#555" };
-  const pBtn = (off) => ({ width:"100%", background:off?"#1a1a1a":"#fff", color:off?"#444":"#000", border:"none", borderRadius:8, padding:"11px 0", fontSize:14, fontWeight:600, cursor:off?"not-allowed":"pointer", marginBottom:12 });
-  const sBadge = (l) => ({ fontSize:11, fontWeight:600, padding:"3px 10px", borderRadius:20, background:l==="POST"?"#0d2b1a":l==="TWEAK"?"#2a1f00":"#2a0d0d", color:l==="POST"?"#2ecc71":l==="TWEAK"?"#f39c12":"#e74c3c" });
+  const inp = { width:"100%", background:"#161616", border:"1px solid #2e2e2e", borderRadius:10, color:"#f0f0f0", fontSize:15, padding:"12px 14px", outline:"none", boxSizing:"border-box", marginBottom:12 };
+  const ta  = { width:"100%", background:"#111", border:"1px solid #2e2e2e", borderRadius:10, color:"#f0f0f0", fontSize:15, padding:"12px 14px", outline:"none", boxSizing:"border-box", resize:"vertical", minHeight:80, lineHeight:1.7, fontFamily:"inherit" };
+  const lbl = { fontSize:13, color:"#888", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:12 };
+  const card = { background:"#141414", border:"1px solid #2a2a2a", borderRadius:14, padding:20, marginBottom:12 };
+  const aRow = { display:"flex", gap:8, flexWrap:"wrap" };
+  const aBtn = { fontSize:13, padding:"7px 14px", borderRadius:8, cursor:"pointer", border:"1px solid #333", background:"transparent", color:"#aaa" };
+  const gBtn = { fontSize:13, padding:"7px 14px", borderRadius:8, cursor:"pointer", border:"1px solid #1a5a30", background:"#0d3320", color:"#3ddc84" };
+  const bBtn = { fontSize:13, padding:"7px 14px", borderRadius:8, cursor:"pointer", border:"1px solid #1a3060", background:"#0a1f40", color:"#6ab0ff" };
+  const rBtn = { fontSize:13, padding:"7px 14px", borderRadius:8, cursor:"pointer", border:"1px solid #3a2020", background:"transparent", color:"#888" };
+  const pBtn = (off) => ({ width:"100%", background:off?"#1e1e1e":"#fff", color:off?"#555":"#000", border:"none", borderRadius:10, padding:"14px 0", fontSize:16, fontWeight:700, cursor:off?"not-allowed":"pointer", marginBottom:14 });
+  const sBadge = (l) => ({ fontSize:12, fontWeight:700, padding:"4px 12px", borderRadius:20, background:l==="POST"?"#0d3320":l==="TWEAK"?"#2a2000":"#2a0d0d", color:l==="POST"?"#3ddc84":l==="TWEAK"?"#f5a623":"#ff6b6b" });
 
   const filteredLib = libFilter==="all" ? library : library.filter(q=>q.tag===libFilter);
 
@@ -477,7 +477,7 @@ export default function SiravScheduler() {
   ];
 
   return (
-    <div style={{ fontFamily:"system-ui,-apple-system,sans-serif", maxWidth:640, margin:"0 auto", padding:"20px 14px", color:"#fff", background:"#0a0a0a", minHeight:"100vh" }}>
+    <div style={{ fontFamily:"system-ui,-apple-system,sans-serif", maxWidth:900, margin:"0 auto", padding:"28px 24px", color:"#f0f0f0", background:"#0a0a0a", minHeight:"100vh" }}>
       {scheduleModal && <ScheduleModal quote={scheduleModal} onConfirm={(d,t)=>schedulePost(scheduleModal,d,t)} onClose={()=>setScheduleModal(null)}/>}
 
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:22 }}>
@@ -524,7 +524,7 @@ export default function SiravScheduler() {
                 </>
               ):(
                 <>
-                  <div style={{ fontSize:15, lineHeight:1.6, color:"#fff", whiteSpace:"pre-wrap", marginBottom:12 }}>{q.text}</div>
+                  <div style={{ fontSize:17, lineHeight:1.75, color:"#f0f0f0", whiteSpace:"pre-wrap", marginBottom:14 }}>{q.text}</div>
                   <div style={aRow}>
                     {q.label==="POST"&&<button style={gBtn} onClick={()=>publishToThreads(q.text,q.id)} disabled={publishing===q.id}>{publishing===q.id?"Publishing...":"↑ Post now"}</button>}
                     {q.label==="POST"&&<button style={bBtn} onClick={()=>setScheduleModal(q)}>📅 Schedule</button>}
@@ -548,7 +548,7 @@ export default function SiravScheduler() {
           {queue.length===0&&<div style={{ textAlign:"center", color:"#333", fontSize:14, padding:"40px 0" }}>Empty. Approve posts from Manage Quote.</div>}
           {queue.map(q=>(
             <div key={q.id} style={card}>
-              <div style={{ fontSize:15, lineHeight:1.6, color:"#fff", whiteSpace:"pre-wrap", marginBottom:10 }}>{q.text}</div>
+              <div style={{ fontSize:17, lineHeight:1.75, color:"#f0f0f0", whiteSpace:"pre-wrap", marginBottom:12 }}>{q.text}</div>
               <div style={aRow}>
                 <button style={gBtn} onClick={()=>publishToThreads(q.text,q.id)} disabled={publishing===q.id}>{publishing===q.id?"Publishing...":"↑ Post now"}</button>
                 <button style={bBtn} onClick={()=>setScheduleModal(q)}>📅 Schedule</button>
@@ -721,7 +721,7 @@ export default function SiravScheduler() {
                 </>
               ):(
                 <>
-                  <div style={{ fontSize:15, lineHeight:1.6, color:"#fff", whiteSpace:"pre-wrap", marginBottom:10 }}>{q.text}</div>
+                  <div style={{ fontSize:17, lineHeight:1.75, color:"#f0f0f0", whiteSpace:"pre-wrap", marginBottom:12 }}>{q.text}</div>
                   <div style={{ display:"flex", gap:5, marginBottom:10 }}>
                     {["identity","relationship","wealth"].map(tag=>(
                       <button key={tag} onClick={()=>setLibraryTag(q.id,tag)}
