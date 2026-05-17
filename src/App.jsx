@@ -249,15 +249,15 @@ const CalendarView = ({ scheduled, library, onSchedule }) => {
       </div>
 
       {selectedDay && (
-        <div style={{ marginTop:16, background:"#141414", border:"1px solid #2a2a2a", borderRadius:14, padding:18 }}>
-          <div style={{ fontSize:13, color:"#aaa", marginBottom:14, fontWeight:600 }}>{MONTH_NAMES[month]} {selectedDay}</div>
+        <div style={{ marginTop:16, background:"#1e1e1e", border:"1px solid #3a3a3a", borderRadius:14, padding:18 }}>
+          <div style={{ fontSize:14, color:"#f0f0f0", marginBottom:14, fontWeight:700 }}>{MONTH_NAMES[month]} {selectedDay}</div>
 
           {/* Scheduled posts for this day */}
           {(dayMap[selectedDay]||[]).length > 0 && (
             <div style={{ marginBottom:16 }}>
-              <div style={{ fontSize:11, color:"#555", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:8 }}>Scheduled</div>
+              <div style={{ fontSize:12, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:8 }}>Scheduled</div>
               {(dayMap[selectedDay]||[]).map((p,i) => (
-                <div key={i} style={{ padding:"10px 12px", background:"#0d2b1a", border:"1px solid #1a4a2a", borderRadius:10, marginBottom:6 }}>
+                <div key={i} style={{ padding:"12px 14px", background:"#162b1e", border:"1px solid #2a5a3a", borderRadius:10, marginBottom:6 }}>
                   <div style={{ fontSize:14, color:"#f0f0f0", whiteSpace:"pre-wrap", marginBottom:4 }}>{p.text}</div>
                   <div style={{ fontSize:12, color:"#3ddc84" }}>{p.time || "—"}</div>
                 </div>
@@ -266,12 +266,12 @@ const CalendarView = ({ scheduled, library, onSchedule }) => {
           )}
 
           {/* Schedule from library */}
-          <div style={{ fontSize:11, color:"#555", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:10 }}>Schedule from library</div>
+          <div style={{ fontSize:12, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:10 }}>Schedule from library</div>
           {library.length === 0
-            ? <div style={{ fontSize:13, color:"#444", marginBottom:10 }}>No quotes in library yet.</div>
+            ? <div style={{ fontSize:14, color:"#777", marginBottom:10 }}>No quotes in library yet.</div>
             : <>
                 <select value={selectedQuoteId} onChange={e => setSelectedQuoteId(e.target.value)}
-                  style={{ ...inpStyle, marginBottom:10, appearance:"none", cursor:"pointer" }}>
+                  style={{ ...inpStyle, marginBottom:10, appearance:"none", cursor:"pointer", background:"#252525", border:"1px solid #3a3a3a", color:"#f0f0f0" }}>
                   <option value="">— Pick a quote —</option>
                   {library.map(q => (
                     <option key={q.id} value={q.id}>
@@ -280,16 +280,16 @@ const CalendarView = ({ scheduled, library, onSchedule }) => {
                   ))}
                 </select>
                 {selectedQuoteId && (
-                  <div style={{ fontSize:14, color:"#ccc", whiteSpace:"pre-wrap", padding:"10px 12px", background:"#0f0f0f", borderRadius:8, border:"1px solid #2a2a2a", marginBottom:10, lineHeight:1.6 }}>
+                  <div style={{ fontSize:14, color:"#e0e0e0", whiteSpace:"pre-wrap", padding:"12px 14px", background:"#252525", borderRadius:10, border:"1px solid #3a3a3a", marginBottom:10, lineHeight:1.7 }}>
                     {library.find(q=>String(q.id)===String(selectedQuoteId))?.text}
                   </div>
                 )}
-                <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:10 }}>
-                  <label style={{ fontSize:12, color:"#777", whiteSpace:"nowrap" }}>Time</label>
-                  <input type="time" value={schedTime} onChange={e=>setSchedTime(e.target.value)} style={{ ...inpStyle }}/>
+                <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:12 }}>
+                  <label style={{ fontSize:13, color:"#aaa", whiteSpace:"nowrap" }}>Time</label>
+                  <input type="time" value={schedTime} onChange={e=>setSchedTime(e.target.value)} style={{ ...inpStyle, background:"#252525", border:"1px solid #3a3a3a" }}/>
                 </div>
                 <button onClick={handleSchedule} disabled={!selectedQuoteId}
-                  style={{ width:"100%", background:selectedQuoteId?"#0d3320":"#1a1a1a", color:selectedQuoteId?"#3ddc84":"#444", border:`1px solid ${selectedQuoteId?"#1a5a30":"#2a2a2a"}`, borderRadius:10, padding:"12px 0", fontSize:14, fontWeight:600, cursor:selectedQuoteId?"pointer":"not-allowed" }}>
+                  style={{ width:"100%", background:selectedQuoteId?"#0d3320":"#252525", color:selectedQuoteId?"#3ddc84":"#666", border:`1px solid ${selectedQuoteId?"#1a5a30":"#3a3a3a"}`, borderRadius:10, padding:"13px 0", fontSize:15, fontWeight:700, cursor:selectedQuoteId?"pointer":"not-allowed" }}>
                   Schedule for {MONTH_NAMES[month]} {selectedDay}
                 </button>
               </>
