@@ -201,9 +201,9 @@ const CalendarView = ({ scheduled }) => {
           style={{ background:"transparent", border:"0.5px solid #222", color:"#888", padding:"5px 14px", borderRadius:6, cursor:"pointer", fontSize:14 }}>›</button>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2, marginBottom:4 }}>
-        {DAY_NAMES.map(d => <div key={d} style={{ textAlign:"center", fontSize:10, color:"#444", padding:"4px 0" }}>{d}</div>)}
+        {DAY_NAMES.map(d => <div key={d} style={{ textAlign:"center", fontSize:12, color:"#888", padding:"6px 0", fontWeight:500 }}>{d}</div>)}
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:3 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4 }}>
         {cells.map((d, i) => {
           if (!d) return <div key={`e${i}`}/>;
           const has = !!dayMap[d];
@@ -211,16 +211,22 @@ const CalendarView = ({ scheduled }) => {
           const isTd = isToday(d);
           return (
             <div key={d} onClick={() => setSelectedDay(isSel ? null : d)}
-              style={{ aspectRatio:"1", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", borderRadius:8, background:isSel?"#1a1a1a":has?"#0d2b1a":"#0d0d0d", border:isTd?"0.5px solid #555":isSel?"0.5px solid #333":has?"0.5px solid #1a4a2a":"0.5px solid #161616", cursor:"pointer" }}>
-              <span style={{ fontSize:11, color:has?"#2ecc71":isTd?"#fff":"#555" }}>{d}</span>
-              {has && <div style={{ width:3, height:3, borderRadius:"50%", background:"#2ecc71", marginTop:2 }}/>}
+              style={{
+                aspectRatio:"1", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", borderRadius:10, cursor:"pointer",
+                background: isTd ? "#1a3a5c" : isSel ? "#222" : has ? "#0d2b1a" : "#181818",
+                border: isTd ? "2px solid #6ab0ff" : isSel ? "1px solid #555" : has ? "1px solid #2a6a3a" : "1px solid #2a2a2a",
+                boxShadow: isTd ? "0 0 8px rgba(106,176,255,0.25)" : "none",
+              }}>
+              <span style={{ fontSize:13, fontWeight:isTd?700:400, color:isTd?"#6ab0ff":has?"#3ddc84":isSel?"#fff":"#bbb" }}>{d}</span>
+              {has && <div style={{ width:4, height:4, borderRadius:"50%", background:"#3ddc84", marginTop:3 }}/>}
             </div>
           );
         })}
       </div>
-      <div style={{ display:"flex", gap:16, marginTop:12, fontSize:11, color:"#444" }}>
-        <span><span style={{ color:"#2ecc71" }}>●</span> Scheduled</span>
-        <span><span style={{ color:"#333" }}>●</span> Open</span>
+      <div style={{ display:"flex", gap:16, marginTop:12, fontSize:12, color:"#777" }}>
+        <span><span style={{ color:"#3ddc84" }}>●</span> Scheduled</span>
+        <span><span style={{ color:"#6ab0ff" }}>●</span> Today</span>
+        <span><span style={{ color:"#555" }}>●</span> Open</span>
       </div>
       {selectedDay && (
         <div style={{ marginTop:16, background:"#0f0f0f", border:"0.5px solid #1e1e1e", borderRadius:12, padding:14 }}>
