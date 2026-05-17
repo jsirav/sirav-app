@@ -605,29 +605,6 @@ export default function SiravScheduler() {
             </div>
           ))}
 
-          {/* RECENT GENERATES */}
-          {recentQuotes.length > 0 && (
-            <>
-              <div style={{ ...lbl, marginTop:28, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <span>Recent — {recentQuotes.length} / 20</span>
-                <button onClick={()=>setRecentQuotes([])} style={{ fontSize:11, color:"#555", background:"transparent", border:"none", cursor:"pointer" }}>Clear all</button>
-              </div>
-              {recentQuotes.map(q=>(
-                <div key={q.id} style={{ ...card, background:"#111", border:"1px solid #222", opacity:0.85 }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
-                    <span style={sBadge(q.label)}>{q.label}</span>
-                    <span style={{ fontSize:12, color:"#666" }}>{q.score}/10</span>
-                  </div>
-                  <div style={{ fontSize:15, lineHeight:1.7, color:"#ccc", whiteSpace:"pre-wrap", marginBottom:10 }}>{q.text}</div>
-                  <div style={aRow}>
-                    <button style={{ ...aBtn, border:"1px solid #1a5a30", color:"#3ddc84" }} onClick={()=>addToLibrary(q)}>→ Library</button>
-                    <button style={gBtn} onClick={()=>addToQueue(q)}>+ Queue</button>
-                    <button style={aBtn} onClick={()=>copyText(q.text,`rec-${q.id}`)}>{copied===`rec-${q.id}`?"✓":"Copy"}</button>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
         </>
       )}
 
@@ -836,6 +813,30 @@ export default function SiravScheduler() {
               )}
             </div>
           ))}
+
+          {/* RECENT GENERATES */}
+          {recentQuotes.length > 0 && (
+            <>
+              <div style={{ ...lbl, marginTop:28, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <span>Recent generates — {recentQuotes.length} / 20</span>
+                <button onClick={()=>setRecentQuotes([])} style={{ fontSize:12, color:"#666", background:"transparent", border:"none", cursor:"pointer" }}>Clear all</button>
+              </div>
+              {recentQuotes.map(q=>(
+                <div key={q.id} style={{ ...card, background:"#111", border:"1px solid #222", opacity:0.85 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                    <span style={sBadge(q.label)}>{q.label}</span>
+                    <span style={{ fontSize:12, color:"#666" }}>{q.score}/10</span>
+                  </div>
+                  <div style={{ fontSize:15, lineHeight:1.7, color:"#ccc", whiteSpace:"pre-wrap", marginBottom:10 }}>{q.text}</div>
+                  <div style={aRow}>
+                    <button style={{ ...aBtn, border:"1px solid #1a5a30", color:"#3ddc84" }} onClick={()=>addToLibrary(q)}>→ Library</button>
+                    <button style={gBtn} onClick={()=>addToQueue(q)}>+ Queue</button>
+                    <button style={aBtn} onClick={()=>copyText(q.text,`rec-${q.id}`)}>{copied===`rec-${q.id}`?"✓":"Copy"}</button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </>
       )}
 
